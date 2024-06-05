@@ -4,7 +4,7 @@ sequenceDiagram
     participant browser
     participant server
 
-    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note | constains note data
     activate server 
     server-->>browser: make a GET request for location /exampleapp/notes 
     deactivate server
@@ -69,7 +69,7 @@ sequenceDiagram
     participant browser
     participant server
     
-    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa | contains note data
     activate server
     server->>browser: note created
     deactivate server
