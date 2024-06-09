@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import bookService from "./bookService"
 
 const Filter = ({ handleFilterChange }) => {
   return(
@@ -28,34 +29,58 @@ const PersonForm = ({
   )
 }
 
-const Persons = ({ persons, nameFilter }) => {
-  return(
-    persons.map(person => { 
-      const name = person.name.toLowerCase()
-      if (name.includes(nameFilter)) {
-        return <p key={person.name}>{person.name} {person.number}</p>
-      }
-    })
-  )
+const Persons = ({ persons, nameFilter, removePerson }) => {
+  if (persons === undefined) {
+    return <></>
+  } else {
+    return(
+      persons.map(person => { 
+        const name = person.name.toLowerCase()
+        if (name.includes(nameFilter)) {
+          return(<p key={person.name}>
+                  {person.name} {person.number} 
+                  <button onClick={() => removePerson(person.id)}>
+                    delete
+                  </button>
+                </p>
+          )
+        }
+      })
+    )
+  }
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNumber] = useState('')
   const [nameFilter, setFilter] = useState('')
   const addNewPerson = (event) => {
     event.preventDefault() 
-    const isPersonAlready = persons.filter(person => person.name === newName)
-    if (isPersonAlready.length) { 
-      alert(`${newName} is already added to phonebook`) 
+    const existingPerson = persons.find(person => person.name === newName)
+    const newPerson = { 
+      name: newName, 
+      number: newNumber, 
+      id: existingPerson.id 
     }
-    else { setPersons(persons.concat({ name: newName, number: newNumber })) }
+    if (existingPerson.name === newName) { 
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const updatePersons = persons.filter(person => person.name !== newName)
+        setPersons(updatePersons.concat(newPerson))
+        bookService.update(newPerson)
+      } 
+    } else { 
+      setPersons(persons.concat(newPerson)) 
+      bookService.create(newPerson)
+    }
+  }
+  const removePerson = personId => {
+    const removePerson = persons.find(person => person.id === personId)
+    if (window.confirm(`Delete ${removePerson.name} ?`)) {
+      const newPersons = persons.filter(person => person.id !== personId)
+      setPersons(newPersons)
+      bookService.remove(personId)
+    }
   }
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
@@ -66,7 +91,12 @@ const App = () => {
   const handleNumberChange = (event) => {
     setNumber(event.target.value)
   }
-
+  useEffect(() => {
+    bookService.getAll()
+    .then(initialPersons => {
+      setPersons(initialPersons)
+    })
+  }, [])
   return (
     <div>
       <h2>Phonebook</h2>
@@ -78,7 +108,10 @@ const App = () => {
         addNewPerson={addNewPerson}
       />
       <h3>Numbers</h3>
-      <Persons persons={persons} nameFilter={nameFilter}/>
+      <Persons 
+        persons={persons} 
+        nameFilter={nameFilter} 
+        removePerson={removePerson}/>
     </div>
   )
 }
