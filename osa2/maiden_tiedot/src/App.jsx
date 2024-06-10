@@ -1,34 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react'
+import networkService from "./networkService"
+import DisplayFullCountry from "./components/DisplayFullCountry"
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [countries, setCountries] = useState([])
+  const [displayCountries, setDisplay] = useState([])
 
+  const showCountry = country => {
+    setDisplay([ country ])
+  }
+  const handleCountries = (event) => {
+    const countryFilter = event.target.value.toLowerCase()
+    if (countryFilter === "") {
+      setDisplay([])
+    } else {
+      const filteredCountries = countries.filter(
+        country => {
+          const lowerCasedName = country.name.common.toLowerCase()
+          return lowerCasedName.includes(countryFilter)
+      })
+      setDisplay(filteredCountries)
+    }
+  }
+  useEffect(() => {
+    networkService.getAll()
+    .then(data => setCountries(data))
+  }, [])
   return (
-    <>
+    <main>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <p>find countries <input onChange={handleCountries}/></p>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <div>
+        { 
+          // Nested conditional rendering
+          displayCountries.length > 10 ? <p>Too many matches, specify another filter</p> 
+          : (
+            displayCountries.length === 1 ? <DisplayFullCountry country={displayCountries[0]}/>
+            : displayCountries.map(country => 
+                <p key={country.cca2}>{ country.name.common } 
+                  <button onClick={() => showCountry(country)}>show</button>
+                </p>) 
+          )
+        }
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </main>
   )
 }
 
