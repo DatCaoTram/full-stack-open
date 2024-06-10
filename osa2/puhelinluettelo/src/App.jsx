@@ -1,77 +1,46 @@
 import { useState, useEffect } from 'react'
 import bookService from "./bookService"
-
-const Filter = ({ handleFilterChange }) => {
-  return(
-    <form>
-      <p>filter shown with <input onChange={handleFilterChange}/></p> 
-    </form>   
-  )
-}
-
-const PersonForm = ({
-  handleNameChange, 
-  handleNumberChange, 
-  addNewPerson
-  }) => {
-  return(
-    <>
-      <div>
-        name: <input onChange={handleNameChange}/>
-      </div>
-      <div>
-        number: <input onChange={handleNumberChange}/>
-      </div>
-      <div>
-        <button type="submit" onClick={addNewPerson}>add</button>
-      </div>
-    </>
-  )
-}
-
-const Persons = ({ persons, nameFilter, removePerson }) => {
-  if (persons === undefined) {
-    return <></>
-  } else {
-    return(
-      persons.map(person => { 
-        const name = person.name.toLowerCase()
-        if (name.includes(nameFilter)) {
-          return(<p key={person.name}>
-                  {person.name} {person.number} 
-                  <button onClick={() => removePerson(person.id)}>
-                    delete
-                  </button>
-                </p>
-          )
-        }
-      })
-    )
-  }
-}
+import Notification from './components/Notification'
+import Filter from './components/Filter'
+import PersonForm from "./components/PersonForm"
+import Persons from "./components/Persons"
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNumber] = useState('')
   const [nameFilter, setFilter] = useState('')
+  const [msg, setMsg] = useState({text: null, state: null})
+  const notify = (text, state) => {
+    setMsg({text, state})
+    setTimeout(() => {
+      setMsg({text: null, state: null})
+    }, "2000");
+  }
   const addNewPerson = (event) => {
     event.preventDefault() 
     const existingPerson = persons.find(person => person.name === newName)
-    const newPerson = { 
-      name: newName, 
-      number: newNumber, 
-      id: existingPerson.id 
-    }
-    if (existingPerson.name === newName) { 
+    const existingPersonIndex = persons.findIndex(person => person.name === newName)
+    if (existingPerson !== undefined) {
+      // Existing person
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        const updatePersons = persons.filter(person => person.name !== newName)
-        setPersons(updatePersons.concat(newPerson))
-        bookService.update(newPerson)
+        /* Deep copy with structuredClone, only 
+        available in newer browsers (baseline 2022) */
+        const updatePersons = structuredClone(persons) 
+        updatePersons[existingPersonIndex].number = newNumber
+        setPersons(updatePersons)
+        notify(`Number changed for ${newName}`, true)
+        bookService.update({name: newName, number: newNumber, id: existingPerson.id})
       } 
-    } else { 
-      setPersons(persons.concat(newPerson)) 
-      bookService.create(newPerson)
+    } else {
+      // Entirely new person
+      const newPerson = { 
+        name: newName, 
+        number: newNumber, 
+      }
+      notify(`Added ${newPerson.name}`, true)
+      bookService.create(newPerson)   
+      .then(data => setPersons(persons.concat(data)))
     }
   }
   const removePerson = personId => {
@@ -79,7 +48,10 @@ const App = () => {
     if (window.confirm(`Delete ${removePerson.name} ?`)) {
       const newPersons = persons.filter(person => person.id !== personId)
       setPersons(newPersons)
+      notify(`Removed ${removePerson.name}`, true)
       bookService.remove(personId)
+      .then(() => console.log("removal succesful"))
+      .catch(() => notify(`Information of ${removePerson.name} has already been removed from server`))
     }
   }
   const handleFilterChange = (event) => {
@@ -100,6 +72,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification msg={msg}/>
       <Filter handleFilterChange={handleFilterChange}/>
       <h3>add a new</h3>
       <PersonForm 

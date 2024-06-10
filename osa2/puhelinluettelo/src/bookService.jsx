@@ -9,13 +9,13 @@ const getAll = () => {
 }
 
 const create = newPerson => {
-    axios.post(baseUrl, newPerson)
+    const response = axios.post(baseUrl, newPerson)
     .then(response => {
-        console.log("succesful")
+        console.log("create succesful") 
+        return response.data
     })
-    .catch(error => {
-        console.log("fail")
-    })
+    .catch(error => console.log("fail"))
+    return response 
 }
 
 const update = updatePerson => {
@@ -25,9 +25,14 @@ const update = updatePerson => {
 }
 
 const remove = personId => {
-    axios.delete(`${baseUrl}/${personId}`)
-    .then(response => console.log("delete succesfully"))
-    .catch(error => console.log("fail"))
+    const response = axios.delete(`${baseUrl}/${personId}`)
+    .then(response => {
+        return Promise.resolve()
+    })
+    .catch(error => {
+        return Promise.reject()
+    })
+    return response
 }
 
 export default { create, getAll, update, remove }
