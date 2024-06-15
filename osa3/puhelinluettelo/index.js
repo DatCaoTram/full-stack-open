@@ -8,6 +8,7 @@ morgan.token('body', (req, res) =>  {
     }
 })
 
+app.use(express.static("dist"))
 app.use(express.json())
 app.use(morgan(function (tokens, req, res) {
   return [
