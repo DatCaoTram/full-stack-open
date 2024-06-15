@@ -60,8 +60,9 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const findId = Number(request.params.id)
+    const findPerson = persons.find(person => person.id === findId)
     persons = persons.filter(person => person.id !== findId)
-    if (!persons.length) {
+    if (findPerson === undefined) {
         return response.status(400).end()
     }
     response.status(204).end()
@@ -71,7 +72,6 @@ app.put("/api/persons/:id", (request, response) => {
     const findId = Number(request.params.id) 
     const person = persons.find(person => person.id === findId)
     person.number = request.body.number
-    console.log(person.number)
     response.status(204).end()
 }) 
 
