@@ -7,8 +7,8 @@ morgan.token('body', (req, res) =>  {
         return JSON.stringify(req.body) 
     }
 })
-app.use(express.json())
 
+app.use(express.json())
 app.use(morgan(function (tokens, req, res) {
   return [
     tokens.method(req, res),
@@ -57,17 +57,25 @@ app.get('/api/persons/:id', (request, response) => {
     response.json(person)
 })
 
+app.delete('/api/persons/:id', (request, response) => {
+    const findId = Number(request.params.id)
+    persons = persons.filter(person => person.id !== findId)
+    response.status(204).end()
+})
+
+app.put("/api/persons/:id", (request, response) => {
+    const findId = Number(request.params.id) 
+    const person = persons.find(person => person.id === findId)
+    person.number = request.body.number
+    console.log(person.number)
+    response.status(204).end()
+}) 
+
 app.get('/info', (request, response) => {
     response.send(`
         <p>Phonebook has info for ${persons.length} people</p>
         <p>${new Date(Date.now())}</p>`)
 
-})
-
-app.delete('/api/persons/:id', (request, response) => {
-    const findId = Number(request.params.id)
-    persons = persons.filter(person => person.id !== findId)
-    response.status(204).end()
 })
 
 app.post("/api/persons", (request, response) => {

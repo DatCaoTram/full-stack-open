@@ -1,0 +1,29 @@
+{
+  "persons": [
+    {
+      "name": "Arto Hellas",
+      "number": "12312321",
+      "id": 1
+    },
+    {
+      "name": "Ada Lovelace",
+      "number": "39-44-5323523",
+      "id": 2
+    },
+    {
+      "name": "Teemu Teekkari",
+      "number": "581928112",
+      "id": 4
+    },
+    {
+      "name": "Albert Einstein",
+      "number": "8906821901",
+      "id": 5
+    },
+    {
+      "name": "Robert Oppenheimer",
+      "number": "2761286312",
+      "id": 6
+    }
+  ]
+}
