@@ -14,14 +14,14 @@ const create = newPerson => {
         console.log("create succesful") 
         return response.data
     })
-    .catch(error => console.log("fail"))
+    .catch(error => Promise.reject(error))
     return response 
 }
 
 const update = updatePerson => {
     axios.put(`${baseUrl}/${updatePerson.id}`, updatePerson)
     .then(response => console.log("update succesful"))
-    .catch(error => console.log("fail"))
+    .catch(error => Promise.reject(error))
 }
 
 const remove = personId => {

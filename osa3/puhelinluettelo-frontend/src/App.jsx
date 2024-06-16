@@ -21,11 +21,7 @@ const App = () => {
     event.preventDefault() 
     const existingPerson = persons.find(person => person.name === newName)
     const existingPersonIndex = persons.findIndex(person => person.name === newName)
-
-    if (newName.trim() === "" || newNumber.trim() === "") {
-      notify(`Name or number is missing`, false)
-    }
-    else if (existingPerson !== undefined) {
+    if (existingPerson !== undefined) {
       // Existing person
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         /* Deep copy with structuredClone, only 
@@ -42,9 +38,14 @@ const App = () => {
         name: newName, 
         number: newNumber, 
       }
-      notify(`Added ${newPerson.name}`, true)
       bookService.create(newPerson)   
-      .then(data => setPersons(persons.concat(data)))
+      .then(data => {
+        notify(`Added ${newPerson.name}`, true)
+        setPersons(persons.concat(data))
+      })
+      .catch(error => {
+        notify(error.response.data.error, false)
+      })
     }
   }
   const removePerson = personId => {
