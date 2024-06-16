@@ -19,9 +19,10 @@ const create = newPerson => {
 }
 
 const update = updatePerson => {
-    axios.put(`${baseUrl}/${updatePerson.id}`, updatePerson)
-    .then(response => console.log("update succesful"))
+    const response = axios.put(`${baseUrl}/${updatePerson.id}`, updatePerson)
+    .then(response => Promise.resolve())
     .catch(error => Promise.reject(error))
+    return response
 }
 
 const remove = personId => {

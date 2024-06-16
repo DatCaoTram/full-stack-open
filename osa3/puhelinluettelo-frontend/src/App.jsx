@@ -24,13 +24,16 @@ const App = () => {
     if (existingPerson !== undefined) {
       // Existing person
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        /* Deep copy with structuredClone, only 
-        available in newer browsers (baseline 2022) */
-        const updatePersons = structuredClone(persons) 
-        updatePersons[existingPersonIndex].number = newNumber
-        setPersons(updatePersons)
-        notify(`Number changed for ${newName}`, true)
         bookService.update({name: newName, number: newNumber, id: existingPerson.id})
+        .then(() => {
+          /* Deep copy with structuredClone, only 
+          available in newer browsers (baseline 2022) */
+          const updatePersons = structuredClone(persons) 
+          updatePersons[existingPersonIndex].number = newNumber
+          setPersons(updatePersons)
+          notify(`Number changed for ${newName}`, true)
+        })
+        .catch(error => notify(error.response.data.error, false))
       } 
     } else {
       // Entirely new person
